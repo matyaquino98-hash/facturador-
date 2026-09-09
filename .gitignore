@@ -1,0 +1,17 @@
+node_modules/
+dist/
+*.log
+.env
+.env.*
+!.env.example
+data/
+*.sqlite
+*.sqlite-journal
+*.db
+# Credenciales ARCA: nunca versionar
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+certs/

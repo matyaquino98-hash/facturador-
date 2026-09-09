@@ -49,12 +49,19 @@ simplicidad y mantenibilidad.
 
 ```bash
 npm install
-cp .env.example .env
-# Generá la clave maestra y pegala en APP_ENCRYPTION_KEY
-openssl rand -base64 48
-
+npm run setup        # crea .env con una APP_ENCRYPTION_KEY nueva
 npm run dev          # backend en :3000 + frontend en :5173
 ```
+
+Para el trámite del certificado, en vez de pelearte con `openssl`:
+
+```bash
+npm run certificado -- --cuit 20123456786 --nombre "TU RAZON SOCIAL"
+```
+
+Genera `certs/arca.key` (permisos 600) y `certs/arca.csr` listo para pegar en WSASS,
+con el `serialNumber` en el formato exacto que ARCA exige — que es donde más se traba
+el trámite. La carpeta `certs/` está en `.gitignore`.
 
 Después, en la app: crear cuenta → **Configuración** → cargar el emisor → pegar
 certificado y clave privada (ver [`docs/CERTIFICADOS.md`](docs/CERTIFICADOS.md)).

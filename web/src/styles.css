@@ -1,40 +1,41 @@
-/* Sistema de diseño mínimo: una tipografía, un acento, mucho aire. */
-:root {
-  --bg: #f7f8fa;
-  --surface: #ffffff;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --line: #e2e8f0;
-  --accent: #2563eb;
-  --accent-ink: #ffffff;
-  --ok-bg: #ecfdf5;
-  --ok-ink: #047857;
-  --warn-bg: #fffbeb;
-  --warn-ink: #b45309;
-  --err-bg: #fef2f2;
-  --err-ink: #b91c1c;
-  --radius: 10px;
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
-  color-scheme: light;
-}
+/* Sistema de diseño: paleta "papel cálido + terracota", tomada del
+   Asistente MEV/PJN — CG Estudio, para que las dos herramientas del estudio
+   se sientan parte del mismo producto.
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1120;
-    --surface: #131c2e;
-    --ink: #e8edf7;
-    --muted: #94a3b8;
-    --line: #24304a;
-    --accent: #4f86f7;
-    --ok-bg: #06281f;
-    --ok-ink: #4ade80;
-    --warn-bg: #2a1f06;
-    --warn-ink: #fbbf24;
-    --err-bg: #2b1113;
-    --err-ink: #f87171;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
-    color-scheme: dark;
-  }
+   Es un sistema de un solo tema (como la extensión): no hay modo oscuro, y
+   todos los colores se pintan explícitamente. */
+:root {
+  --papel: #fdf7f0;
+  --lino: #f7eee3;
+  --linea: #ecdcc9;
+  --tinta: #2a1d14;
+  --humo: #8b7460;
+  --humo-bajo: #a8937f;
+  --terracota: #d4571f;
+  --ambar: #f0912e;
+  --ambar-suave: #fceadb;
+
+  /* Alias por rol: los componentes usan estos, no los nombres de color. */
+  --bg: var(--lino);
+  --surface: var(--papel);
+  --ink: var(--tinta);
+  --muted: var(--humo);
+  --line: var(--linea);
+  --accent: var(--terracota);
+  --accent-ink: #ffffff;
+  --ok-bg: #e4f4ea;
+  --ok-ink: #136c39;
+  --warn-bg: var(--ambar-suave);
+  --warn-ink: #8f2415;
+  --err-bg: #fbe6e2;
+  --err-ink: #8f2415;
+  --alerta: #c8341f;
+
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(90, 55, 20, 0.06), 0 8px 24px -12px rgba(90, 55, 20, 0.22);
+  --sans: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -43,7 +44,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font: 15px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -64,16 +65,16 @@ p { margin: 0; }
 }
 .brand { font-weight: 700; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
 .brand-mark {
-  width: 24px; height: 24px; border-radius: 7px; background: var(--accent);
+  width: 24px; height: 24px; border-radius: 8px; background: var(--accent);
   color: var(--accent-ink); display: grid; place-items: center; font-size: 13px; font-weight: 800;
 }
 .nav { display: flex; gap: 2px; margin-left: auto; align-items: center; }
 .nav button {
-  background: none; border: 0; padding: 7px 12px; border-radius: 8px;
+  background: none; border: 0; padding: 7px 12px; border-radius: 999px;
   color: var(--muted); font: inherit; font-size: 14px; cursor: pointer;
 }
 .nav button:hover { background: var(--bg); color: var(--ink); }
-.nav button[aria-current='true'] { background: var(--bg); color: var(--ink); font-weight: 600; }
+.nav button[aria-current='true'] { background: var(--ambar-suave); color: var(--warn-ink); font-weight: 600; }
 
 .main { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 24px 20px 64px; }
 .main.wide { max-width: 1120px; }
@@ -94,14 +95,14 @@ p { margin: 0; }
 .field .error { font-size: 12px; color: var(--err-ink); }
 
 input, select, textarea {
-  font: inherit; color: var(--ink); background: var(--surface);
-  border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; width: 100%;
+  font: inherit; color: var(--ink); background: #fff;
+  border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; width: 100%;
   transition: border-color 0.12s, box-shadow 0.12s;
 }
 input:focus, select:focus, textarea:focus {
-  outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212, 87, 31, 0.16);
 }
-input[aria-invalid='true'] { border-color: var(--err-ink); }
+input[aria-invalid='true'] { border-color: var(--alerta); }
 input:disabled, select:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed; }
 input[type='checkbox'] { width: auto; accent-color: var(--accent); }
 
@@ -117,8 +118,8 @@ input[type='checkbox'] { width: auto; accent-color: var(--accent); }
 
 /* --- Botones --- */
 button.btn {
-  font: inherit; font-weight: 600; border-radius: 8px; padding: 9px 16px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  font: inherit; font-weight: 600; border-radius: 9px; padding: 9px 16px;
+  border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   transition: filter 0.12s, background 0.12s;
 }
@@ -126,8 +127,8 @@ button.btn:hover:not(:disabled) { background: var(--bg); }
 button.btn:disabled { opacity: 0.55; cursor: not-allowed; }
 button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
 button.btn.primary:hover:not(:disabled) { filter: brightness(1.08); background: var(--accent); }
-button.btn.lg { padding: 13px 22px; font-size: 16px; width: 100%; }
-button.btn.ghost { border-color: transparent; background: none; color: var(--muted); padding: 6px 10px; }
+button.btn.lg { padding: 13px 22px; font-size: 16px; width: 100%; border-radius: 12px; }
+button.btn.ghost { border-color: transparent; background: none; color: var(--muted); padding: 6px 10px; border-radius: 999px; }
 button.btn.ghost:hover:not(:disabled) { background: var(--bg); color: var(--ink); }
 button.btn.danger { color: var(--err-ink); }
 
@@ -148,7 +149,7 @@ button.btn.danger { color: var(--err-ink); }
 .totals div.grand { font-size: 21px; font-weight: 700; color: var(--ink); padding-top: 8px; border-top: 1px solid var(--line); }
 
 /* --- Avisos --- */
-.alert { border-radius: 8px; padding: 12px 14px; font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; }
+.alert { border-radius: 10px; padding: 12px 14px; font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; }
 .alert.ok { background: var(--ok-bg); color: var(--ok-ink); }
 .alert.warn { background: var(--warn-bg); color: var(--warn-ink); }
 .alert.err { background: var(--err-bg); color: var(--err-ink); }
@@ -172,7 +173,7 @@ button.btn.danger { color: var(--err-ink); }
 
 .suggest {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted);
+  background: var(--ambar-suave); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--warn-ink);
 }
 .suggest strong { color: var(--ink); font-size: 14px; }
 
@@ -197,7 +198,7 @@ tbody tr:hover { background: var(--bg); }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; font-size: 14px; }
 .kv dt { color: var(--muted); }
 .kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-.kv dd.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; }
+.kv dd.mono { font-family: var(--mono); font-size: 13.5px; }
 
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .actions .btn { flex: 1; min-width: 150px; }
@@ -222,4 +223,4 @@ tbody tr:hover { background: var(--bg); }
 
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .muted { color: var(--muted); font-size: 13px; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.mono { font-family: var(--mono); }

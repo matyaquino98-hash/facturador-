@@ -12,7 +12,15 @@ distinta. Empezá siempre por homologación.
 
 ## 1. Generar la clave privada y el pedido (CSR)
 
-En tu máquina, no en el servidor:
+**El camino corto**, desde la raíz del proyecto:
+
+```bash
+npm run certificado -- --cuit 20123456786 --nombre "TU RAZON SOCIAL"
+```
+
+Deja `certs/arca.key` (con permisos 600) y `certs/arca.csr`. Se niega a pisar una clave
+existente, valida el CUIT antes de trabajar y arma el `serialNumber` en el formato que
+ARCA exige. Si preferís hacerlo a mano, es equivalente a esto:
 
 ```bash
 # Clave privada (guardala como un secreto: quien la tiene puede facturar a tu nombre)

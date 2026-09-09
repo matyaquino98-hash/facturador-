@@ -43,9 +43,12 @@ interface AlicuotaPdf {
   importeCents: number;
 }
 
-const INK = '#111827';
-const MUTED = '#6b7280';
-const LINE = '#d1d5db';
+// Paleta del comprobante impreso, alineada con la identidad de la app
+// (papel cálido + terracota). El fondo queda blanco: es un documento para imprimir.
+const INK = '#2a1d14';
+const MUTED = '#8b7460';
+const LINE = '#ecdcc9';
+const ACCENT = '#d4571f';
 const MARGIN = 40;
 
 export async function generarPdf(invoice: InvoiceRow, issuer: PublicIssuer): Promise<Buffer> {
@@ -150,7 +153,7 @@ function drawHeader(
     doc
       .font('Helvetica-Bold')
       .fontSize(8)
-      .fillColor('#b91c1c')
+      .fillColor(ACCENT)
       .text('COMPROBANTE EMITIDO EN HOMOLOGACIÓN — SIN VALIDEZ FISCAL', MARGIN, MARGIN + 136, {
         width,
         align: 'center',
@@ -209,7 +212,7 @@ function drawItems(
     ? ['Descripción', 'Cantidad', 'Precio unit.', 'IVA', 'Subtotal']
     : ['Descripción', 'Cantidad', 'Precio unit.', '', 'Importe'];
 
-  doc.rect(MARGIN, y, width, 20).fill('#f3f4f6');
+  doc.rect(MARGIN, y, width, 20).fill('#f7eee3');
   doc.fillColor(MUTED).font('Helvetica-Bold').fontSize(7.5);
   headers.forEach((h, i) => {
     if (h === '') return;
@@ -359,7 +362,7 @@ async function drawFooter(
     doc
       .font('Helvetica-Bold')
       .fontSize(10)
-      .fillColor('#b91c1c')
+      .fillColor(ACCENT)
       .text('COMPROBANTE SIN CAE — NO AUTORIZADO POR ARCA', MARGIN, y + 30, {
         width,
         align: 'center',

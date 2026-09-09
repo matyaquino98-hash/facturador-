@@ -36,11 +36,11 @@ Integra el web service oficial **WSFEv1** de ARCA (R.G. 4291) con autenticación
 | Capa | Elección | Por qué |
 |---|---|---|
 | Backend | Node 20+ · TypeScript · Fastify | Liviano, tipado, sin ceremonia |
-| Base de datos | SQLite (better-sqlite3) | Cero configuración para el volumen de una PyME |
+| Base de datos | SQLite en WebAssembly (sql.js) | Cero configuración y **cero dependencias nativas**: el mismo paquete corre en Windows, macOS y Linux |
 | Integración ARCA | SOAP armado a mano + `node-forge` | Sin descargar WSDL en runtime; firma CMS/PKCS#7 real |
 | PDF | `pdfkit` + `qrcode` | Sin navegador headless |
 | Frontend | React · Vite | SPA simple, responsive |
-| Tests | Vitest | 102 tests, incluido el flujo completo contra un ARCA simulado |
+| Tests | Vitest | 112 tests, incluido el flujo completo contra un ARCA simulado |
 
 El repositorio estaba vacío, así que la arquitectura se eligió desde cero priorizando
 simplicidad y mantenibilidad.
@@ -82,13 +82,15 @@ proxy con TLS adelante: la cookie de sesión sólo se marca `Secure` con `COOKIE
 ## Tests
 
 ```bash
-npm test           # 102 tests
+npm test           # 112 tests
 npm run typecheck
 ```
 
 Cubren cálculo de IVA, totales y redondeos, validación de CUIT, validación de datos
 obligatorios, determinación del comprobante, construcción y parseo de los mensajes de
-WSFEv1, manejo de errores de ARCA, emisión exitosa y generación del PDF.
+WSFEv1, manejo de errores de ARCA, emisión exitosa, generación del PDF y la capa de
+persistencia (que los datos sobrevivan a un reinicio y que las claves foráneas sigan
+activas después de cada volcado a disco).
 
 El flujo de emisión se prueba de punta a punta contra un **ARCA simulado**
 (`server/test/helpers/fakeArca.ts`): la firma CMS, el SOAP y la persistencia son reales;

@@ -1,29 +1,165 @@
 /**
- * SQLite con better-sqlite3: cero configuración, transacciones sincrónicas y
- * suficiente para el volumen de un facturador de una PyME.
+ * Base de datos: SQLite compilado a WebAssembly (sql.js).
+ *
+ * Por qué no un binding nativo: `better-sqlite3` hay que compilarlo (o bajar un
+ * prebuilt) para cada sistema operativo y cada versión de Node. Eso hacía imposible
+ * entregar la app lista para usar: el paquete servía en una máquina y fallaba en otra.
+ * sql.js es el mismo SQLite, en WASM, así que el `node_modules` es idéntico y portable
+ * en Windows, macOS y Linux, con cualquier Node 20+.
+ *
+ * El precio es que la base vive en memoria y se vuelca a disco después de cada
+ * escritura. Para el volumen de un facturador (miles de comprobantes, unos pocos MB)
+ * es irrelevante, y el volcado es atómico: se escribe un temporal y recién ahí se
+ * renombra, así un corte de luz nunca deja el archivo a medio escribir.
+ *
+ * La interfaz que se expone imita la de better-sqlite3 (`prepare().get()/.all()/.run()`,
+ * `exec()`, `pragma()`), que es la que usa el resto de la aplicación.
  */
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
+import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
+import { createRequire } from 'node:module';
+import { mkdirSync, readFileSync, renameSync, writeFileSync, existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 
-let db: Database.Database | null = null;
-
-export function initDb(file: string): Database.Database {
-  mkdirSync(dirname(file), { recursive: true });
-  const instance = new Database(file);
-  instance.pragma('journal_mode = WAL');
-  instance.pragma('foreign_keys = ON');
-  migrate(instance);
-  db = instance;
-  return instance;
+export interface Statement {
+  get(...params: unknown[]): unknown;
+  all(...params: unknown[]): unknown[];
+  run(...params: unknown[]): { changes: number; lastInsertRowid: number };
 }
 
-export function getDb(): Database.Database {
+export interface Db {
+  prepare(sql: string): Statement;
+  exec(sql: string): void;
+  pragma(sentencia: string): void;
+  /** Fuerza el volcado a disco. */
+  flush(): void;
+}
+
+let db: Db | null = null;
+
+/** Convierte parámetros al tipo que acepta sql.js. */
+function normalizar(params: unknown[]): Array<string | number | Uint8Array | null> {
+  const planos = params.length === 1 && Array.isArray(params[0]) ? (params[0] as unknown[]) : params;
+  return planos.map((p) => {
+    if (p === undefined || p === null) return null;
+    if (typeof p === 'boolean') return p ? 1 : 0;
+    if (typeof p === 'bigint') return Number(p);
+    if (typeof p === 'number' || typeof p === 'string') return p;
+    if (p instanceof Uint8Array) return p;
+    return String(p);
+  });
+}
+
+export async function initDb(file: string): Promise<Db> {
+  const ruta = resolve(file);
+  mkdirSync(dirname(ruta), { recursive: true });
+
+  // El .wasm viaja dentro del paquete; se resuelve por ruta real para que funcione
+  // igual ejecutando desde el código fuente o desde el compilado.
+  const require = createRequire(import.meta.url);
+  const wasmPath = resolve(dirname(require.resolve('sql.js')), 'sql-wasm.wasm');
+
+  const binario = readFileSync(wasmPath);
+  const SQL = await initSqlJs({
+    locateFile: () => wasmPath,
+    // El tipo declara ArrayBuffer; el Buffer de Node cumple el contrato en runtime.
+    wasmBinary: binario.buffer.slice(
+      binario.byteOffset,
+      binario.byteOffset + binario.byteLength,
+    ) as ArrayBuffer,
+  });
+
+  const interna: SqlJsDatabase = existsSync(ruta)
+    ? new SQL.Database(readFileSync(ruta))
+    : new SQL.Database();
+
+  let sucia = false;
+
+  /**
+   * Pragmas de conexión. Hay que reaplicarlos después de cada volcado: `export()`
+   * de sql.js cierra y reabre la base internamente, y eso los resetea a su valor
+   * por omisión. Sin esto, `foreign_keys` queda apagado tras la primera escritura
+   * y los ON DELETE CASCADE del esquema dejan de aplicarse en silencio.
+   */
+  function aplicarPragmas(): void {
+    interna.exec('PRAGMA foreign_keys = ON;');
+  }
+
+  function volcar(): void {
+    if (!sucia) return;
+    const temporal = `${ruta}.tmp`;
+    // Escritura atómica: si se corta la luz a mitad, el archivo bueno sigue intacto.
+    writeFileSync(temporal, Buffer.from(interna.export()));
+    renameSync(temporal, ruta);
+    aplicarPragmas();
+    sucia = false;
+  }
+
+  const instancia: Db = {
+    prepare(sql: string): Statement {
+      return {
+        get(...params: unknown[]): unknown {
+          const stmt = interna.prepare(sql);
+          try {
+            stmt.bind(normalizar(params));
+            return stmt.step() ? stmt.getAsObject() : undefined;
+          } finally {
+            stmt.free();
+          }
+        },
+        all(...params: unknown[]): unknown[] {
+          const stmt = interna.prepare(sql);
+          try {
+            stmt.bind(normalizar(params));
+            const filas: unknown[] = [];
+            while (stmt.step()) filas.push(stmt.getAsObject());
+            return filas;
+          } finally {
+            stmt.free();
+          }
+        },
+        run(...params: unknown[]): { changes: number; lastInsertRowid: number } {
+          const stmt = interna.prepare(sql);
+          try {
+            stmt.bind(normalizar(params));
+            stmt.step();
+          } finally {
+            stmt.free();
+          }
+          const changes = interna.getRowsModified();
+          const resultado = interna.exec('SELECT last_insert_rowid() AS id');
+          const lastInsertRowid = Number(resultado[0]?.values[0]?.[0] ?? 0);
+          sucia = true;
+          volcar();
+          return { changes, lastInsertRowid };
+        },
+      };
+    },
+    exec(sql: string): void {
+      interna.exec(sql);
+      sucia = true;
+      volcar();
+    },
+    pragma(sentencia: string): void {
+      interna.exec(`PRAGMA ${sentencia};`);
+    },
+    flush: volcar,
+  };
+
+  aplicarPragmas();
+  migrate(instancia);
+  sucia = true;
+  volcar();
+
+  db = instancia;
+  return instancia;
+}
+
+export function getDb(): Db {
   if (!db) throw new Error('initDb() no fue invocado.');
   return db;
 }
 
-function migrate(d: Database.Database): void {
+function migrate(d: Db): void {
   d.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,

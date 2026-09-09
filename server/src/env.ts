@@ -9,11 +9,15 @@ import { dirname, resolve } from 'node:path';
  * Nunca pisa una variable ya definida en el entorno: lo que viene del sistema
  * o del comando manda sobre el archivo.
  */
+/** Raíz del proyecto: la carpeta donde está el .env. */
+let raizProyecto = process.cwd();
+
 function cargarEnv(): void {
   let dir = process.cwd();
   for (let i = 0; i < 4; i++) {
     const archivo = resolve(dir, '.env');
     if (existsSync(archivo)) {
+      raizProyecto = dir;
       for (const linea of readFileSync(archivo, 'utf8').split('\n')) {
         const limpia = linea.trim();
         if (limpia === '' || limpia.startsWith('#')) continue;
@@ -50,7 +54,12 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
   host: process.env.HOST ?? '0.0.0.0',
-  dbFile: resolve(process.env.DB_FILE ?? 'data/facturador.sqlite'),
+  /**
+   * Ruta de la base. Se resuelve contra la raíz del proyecto, no contra el
+   * directorio de trabajo: así la base es siempre la misma sin importar desde
+   * dónde se arranque el servidor. Una ruta absoluta en DB_FILE se respeta tal cual.
+   */
+  dbFile: resolve(raizProyecto, process.env.DB_FILE ?? 'data/facturador.sqlite'),
   /**
    * Clave maestra para cifrar certificados y claves privadas de ARCA.
    * En producción es obligatoria: sin ella no se puede descifrar nada de lo guardado.

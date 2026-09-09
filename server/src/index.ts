@@ -13,7 +13,7 @@ import { directoryRoutes } from './routes/directory.js';
 
 export async function buildApp() {
   initCrypto(env.encryptionKey);
-  initDb(env.dbFile);
+  await initDb(env.dbFile);
 
   const app = Fastify({
     // Nunca loguear cuerpos: podrían contener certificados o claves privadas.

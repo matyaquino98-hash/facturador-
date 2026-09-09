@@ -51,10 +51,10 @@ function facturaBase(issuerId: number) {
   };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   dir = mkdtempSync(join(tmpdir(), 'facturador-test-'));
   initCrypto('clave-de-prueba-con-mas-de-32-caracteres-ok');
-  initDb(join(dir, 'test.sqlite'));
+  await initDb(join(dir, "test.sqlite"));
   const u = getDb()
     .prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)')
     .run('test@example.com', 'x');

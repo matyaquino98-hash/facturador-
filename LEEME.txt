@@ -1,71 +1,92 @@
 FACTURADOR — Facturación electrónica ARCA
 =========================================
+Versión para Mac.
+
 
 PARA EMPEZAR
 ------------
 
-  Mac:      doble clic en  iniciar.command
-  Windows:  doble clic en  iniciar.bat
-  Linux:    ./iniciar.sh
+  CLIC DERECHO sobre  iniciar.command  ->  Abrir  ->  Abrir
 
-La primera vez tarda un minuto: instala lo que necesita y crea la
-configuración. Después arranca en segundos y abre el navegador solo.
+Importante: la PRIMERA vez tiene que ser con clic derecho, no doble clic.
+macOS bloquea los archivos descargados de internet que no están firmados, y
+el clic derecho es la forma de autorizarlo. De ahí en adelante, doble clic
+normal.
 
-Lo único que tenés que tener instalado es Node.js (versión 20 o superior).
-Si no lo tenés, bajalo de https://nodejs.org y elegí la versión LTS.
+Se abre una ventana de Terminal y, unos segundos después, el navegador con el
+programa. Dejá esa ventana abierta mientras lo usás: ahí corre el programa.
+Para cerrarlo, cerrá esa ventana.
 
+La primera vez, si tu Mac no tiene Node.js (el motor que hace funcionar el
+programa), el archivo te lo dice y te lleva a bajarlo. Es un instalador
+normal: Continuar, Continuar, Instalar. Después volvés a abrir iniciar.command.
 
-NOTA PARA MAC
--------------
-
-Si al hacer doble clic macOS dice que no puede abrirlo porque viene de un
-desarrollador no identificado:
-
-  Clic derecho sobre iniciar.command  ->  Abrir  ->  Abrir
-
-Solo hace falta la primera vez.
+Todo lo demás ya viene adentro del ZIP: no hay que instalar nada más.
 
 
-PARA EMITIR FACTURAS DE VERDAD
-------------------------------
+QUÉ PODÉS HACER APENAS LO ABRÍS
+-------------------------------
 
-La app funciona apenas la abrís, pero para que ARCA le dé un CAE a tus
-comprobantes necesitás un certificado, que se tramita con Clave Fiscal.
+  - Crear tu cuenta y cargar los datos de tu CUIT.
+  - Cargar clientes y productos.
+  - Armar facturas y ver el total con IVA calculado.
 
-  1. Abrí una terminal en esta carpeta y corré:
+Lo que TODAVÍA NO vas a poder hacer es obtener el CAE, porque para eso
+ARCA exige un certificado a tu nombre. Seguí leyendo.
 
-       npm run certificado -- --cuit TU_CUIT --nombre "TU RAZON SOCIAL"
 
-     Eso deja certs/arca.csr listo.
+PARA EMITIR FACTURAS DE VERDAD (obtener el CAE)
+-----------------------------------------------
 
-  2. Entrá a WSASS (homologación) con Clave Fiscal, pegá el CSR y bajá
-     el certificado.
+  1. Clic derecho -> Abrir sobre:  Generar certificado ARCA.command
+     Te pide tu CUIT y tu razón social, y deja dos archivos en la carpeta
+     "certs":  arca.key (tu clave privada) y arca.csr (el pedido).
 
-  3. Asociá el certificado al servicio "Facturación Electrónica".
+  2. Entrá a ARCA con tu Clave Fiscal, a la aplicación WSASS
+     (es el entorno de pruebas, llamado "homologación").
+     Elegí "Nuevo certificado" y pegá el contenido de arca.csr.
+     Descargá el certificado que te devuelve.
 
-  4. En la app: Configuración -> pegá el certificado y la clave privada.
+  3. En la misma aplicación, asociá ese certificado al servicio
+     "Facturación Electrónica".
 
-El paso a paso completo está en docs/CERTIFICADOS.md
+  4. Volvé al programa: Configuración -> pegá el certificado y el
+     contenido de arca.key.
+
+A partir de ahí el botón "Generar factura" queda habilitado.
+
+El paso a paso detallado está en:  docs/CERTIFICADOS.md
 
 
 EMPEZÁ SIEMPRE EN HOMOLOGACIÓN
 ------------------------------
 
-Es el entorno de pruebas de ARCA. Los comprobantes que emitas ahí no tienen
-validez fiscal, y la app te lo avisa con un cartel y lo imprime en el PDF.
-Recién cuando veas que todo sale bien, pasá el emisor a producción.
+Homologación es el entorno de pruebas de ARCA. Los comprobantes que emitas
+ahí NO tienen validez fiscal, y el programa te lo avisa con un cartel y lo
+imprime en el PDF. Recién cuando compruebes que todo sale bien, cambiá el
+emisor a producción desde Configuración.
 
 
-SEGURIDAD
----------
+CUIDADO CON ESTOS ARCHIVOS
+--------------------------
 
-Tu clave privada de ARCA y el archivo .env son secretos: no los compartas
-ni los subas a ningún lado. Quien tenga esa clave puede facturar a tu nombre.
+  certs/arca.key   tu clave privada de ARCA
+  .env             la clave con la que se cifran tus credenciales
+
+Son secretos. Quien tenga el arca.key puede emitir facturas a tu nombre.
+No los mandes por mail ni los subas a ningún lado.
+
+Tus facturas y tu base de datos quedan en la carpeta "data".
+Hacé una copia de esa carpeta de vez en cuando.
 
 
-DOCUMENTACIÓN
--------------
+DÓNDE ESTÁ TODO
+---------------
 
-  README.md              qué hace y cómo está armado
-  docs/CERTIFICADOS.md   el trámite del certificado, paso a paso
-  docs/ARCA.md           la integración con ARCA y qué falta verificar
+  iniciar.command                 abrir el programa
+  Generar certificado ARCA.command  el trámite del certificado
+  data/                           tu base de datos (respaldala)
+  certs/                          tus credenciales de ARCA (secreto)
+  docs/CERTIFICADOS.md            el trámite explicado en detalle
+  docs/ARCA.md                    cómo funciona la integración con ARCA
+  README.md                       detalle técnico del proyecto

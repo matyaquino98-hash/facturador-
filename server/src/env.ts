@@ -1,4 +1,41 @@
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+
+/**
+ * Carga el .env sin depender de dotenv ni de la versión de Node.
+ *
+ * Busca hacia arriba desde el directorio actual, porque el servidor compilado
+ * arranca desde `server/` mientras que el .env vive en la raíz del proyecto.
+ * Nunca pisa una variable ya definida en el entorno: lo que viene del sistema
+ * o del comando manda sobre el archivo.
+ */
+function cargarEnv(): void {
+  let dir = process.cwd();
+  for (let i = 0; i < 4; i++) {
+    const archivo = resolve(dir, '.env');
+    if (existsSync(archivo)) {
+      for (const linea of readFileSync(archivo, 'utf8').split('\n')) {
+        const limpia = linea.trim();
+        if (limpia === '' || limpia.startsWith('#')) continue;
+        const corte = limpia.indexOf('=');
+        if (corte <= 0) continue;
+        const clave = limpia.slice(0, corte).trim();
+        let valor = limpia.slice(corte + 1).trim();
+        // Admite valores entrecomillados.
+        if (valor.length >= 2 && (valor[0] === '"' || valor[0] === "'") && valor.at(-1) === valor[0]) {
+          valor = valor.slice(1, -1);
+        }
+        if (process.env[clave] === undefined) process.env[clave] = valor;
+      }
+      return;
+    }
+    const padre = dirname(dir);
+    if (padre === dir) return;
+    dir = padre;
+  }
+}
+
+cargarEnv();
 
 function required(name: string, fallbackInDev?: string): string {
   const value = process.env[name];

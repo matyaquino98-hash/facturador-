@@ -1,0 +1,71 @@
+FACTURADOR — Facturación electrónica ARCA
+=========================================
+
+PARA EMPEZAR
+------------
+
+  Mac:      doble clic en  iniciar.command
+  Windows:  doble clic en  iniciar.bat
+  Linux:    ./iniciar.sh
+
+La primera vez tarda un minuto: instala lo que necesita y crea la
+configuración. Después arranca en segundos y abre el navegador solo.
+
+Lo único que tenés que tener instalado es Node.js (versión 20 o superior).
+Si no lo tenés, bajalo de https://nodejs.org y elegí la versión LTS.
+
+
+NOTA PARA MAC
+-------------
+
+Si al hacer doble clic macOS dice que no puede abrirlo porque viene de un
+desarrollador no identificado:
+
+  Clic derecho sobre iniciar.command  ->  Abrir  ->  Abrir
+
+Solo hace falta la primera vez.
+
+
+PARA EMITIR FACTURAS DE VERDAD
+------------------------------
+
+La app funciona apenas la abrís, pero para que ARCA le dé un CAE a tus
+comprobantes necesitás un certificado, que se tramita con Clave Fiscal.
+
+  1. Abrí una terminal en esta carpeta y corré:
+
+       npm run certificado -- --cuit TU_CUIT --nombre "TU RAZON SOCIAL"
+
+     Eso deja certs/arca.csr listo.
+
+  2. Entrá a WSASS (homologación) con Clave Fiscal, pegá el CSR y bajá
+     el certificado.
+
+  3. Asociá el certificado al servicio "Facturación Electrónica".
+
+  4. En la app: Configuración -> pegá el certificado y la clave privada.
+
+El paso a paso completo está en docs/CERTIFICADOS.md
+
+
+EMPEZÁ SIEMPRE EN HOMOLOGACIÓN
+------------------------------
+
+Es el entorno de pruebas de ARCA. Los comprobantes que emitas ahí no tienen
+validez fiscal, y la app te lo avisa con un cartel y lo imprime en el PDF.
+Recién cuando veas que todo sale bien, pasá el emisor a producción.
+
+
+SEGURIDAD
+---------
+
+Tu clave privada de ARCA y el archivo .env son secretos: no los compartas
+ni los subas a ningún lado. Quien tenga esa clave puede facturar a tu nombre.
+
+
+DOCUMENTACIÓN
+-------------
+
+  README.md              qué hace y cómo está armado
+  docs/CERTIFICADOS.md   el trámite del certificado, paso a paso
+  docs/ARCA.md           la integración con ARCA y qué falta verificar

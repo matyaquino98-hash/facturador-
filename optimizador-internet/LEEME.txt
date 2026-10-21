@@ -20,7 +20,9 @@ tu proveedor: eso depende del plan y del router.
 COMO SE USA
 -----------
   WINDOWS:  doble clic en  "Optimizar internet.bat"
-            Windows pide permiso de administrador: acepta.
+            Windows pide permiso de administrador: toca SI.
+            Si aparece "Windows protegio su PC": Mas informacion ->
+            Ejecutar de todas formas.
             Elegi 1 (estandar) o 2 (maximo).
 
   MAC:      clic derecho en  optimizador.command  ->  Abrir  ->  Abrir
@@ -38,5 +40,5 @@ SI ALGO DEJA DE ANDAR
   - Volver todo atras:  "Restaurar internet.bat"  (Windows) u opcion 3 del
     menu. Deja el hosts y el DNS exactamente como estaban.
 
-Los respaldos se guardan en esta misma carpeta (respaldo-hosts.txt y
-respaldo-dns.*). No los borres si pensas restaurar.
+En Windows los respaldos quedan en C:\ProgramData\OptimizadorInternet, asi
+Restaurar funciona aunque muevas o borres esta carpeta.

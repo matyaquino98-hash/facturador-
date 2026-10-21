@@ -1,0 +1,42 @@
+OPTIMIZADOR DE INTERNET
+=======================
+
+QUE HACE
+--------
+  - Bloquea publicidad, rastreadores, sitios de malware y estafas en TODO el
+    sistema: todos los navegadores, apps y juegos, sin instalar extensiones.
+    Usa listas publicas que se actualizan a diario (StevenBlack/hosts):
+      * Estandar: ~80.000 dominios (publicidad + rastreo + malware).
+      * Maximo:  ~160.000 dominios (ademas apuestas, noticias falsas y adultos).
+  - Pone DNS rapido y seguro: Cloudflare 1.1.1.2, que ademas frena malware.
+  - Limpia la cache DNS y los archivos temporales, y deja el TCP en
+    autoajuste para aprovechar toda la velocidad contratada.
+
+Las paginas cargan mas rapido porque no bajan publicidad ni rastreadores.
+Lo que NO puede hacer ningun programa es darte mas megas que los que te da
+tu proveedor: eso depende del plan y del router.
+
+
+COMO SE USA
+-----------
+  WINDOWS:  doble clic en  "Optimizar internet.bat"
+            Windows pide permiso de administrador: acepta.
+            Elegi 1 (estandar) o 2 (maximo).
+
+  MAC:      clic derecho en  optimizador.command  ->  Abrir  ->  Abrir
+            Te pide la contrasena de tu usuario.
+
+  LINUX:    ./optimizador.command
+
+Conviene repetirlo una vez por mes para tener las listas al dia.
+
+
+SI ALGO DEJA DE ANDAR
+---------------------
+  - Una pagina puntual: agrega su dominio en  permitidos.txt  (uno por linea)
+    y volve a optimizar.
+  - Volver todo atras:  "Restaurar internet.bat"  (Windows) u opcion 3 del
+    menu. Deja el hosts y el DNS exactamente como estaban.
+
+Los respaldos se guardan en esta misma carpeta (respaldo-hosts.txt y
+respaldo-dns.*). No los borres si pensas restaurar.

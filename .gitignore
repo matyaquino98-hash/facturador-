@@ -15,3 +15,5 @@ data/
 *.p12
 *.pfx
 certs/
+# Optimizador de internet: respaldos locales de cada maquina
+optimizador-internet/respaldo-*

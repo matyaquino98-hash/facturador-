@@ -1,0 +1,7 @@
+# Dominios que el optimizador NUNCA bloquea.
+# Si una pagina o app deja de funcionar, agrega aca su dominio
+# (uno por linea, sin http:// ni barras) y volve a optimizar.
+#
+# Ejemplos (sacales el # para activarlos):
+# www.googleadservices.com
+# s.click.aliexpress.com

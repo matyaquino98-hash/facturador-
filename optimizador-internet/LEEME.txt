@@ -13,6 +13,11 @@ QUE HACE
     autoajuste para aprovechar toda la velocidad contratada.
 
 Las paginas cargan mas rapido porque no bajan publicidad ni rastreadores.
+Para sacar TAMBIEN los anuncios de YouTube, Instagram o Facebook (que vienen
+del mismo servidor que el video o las fotos y ningun bloqueo por sistema
+puede separar), sumale al navegador la extension gratuita uBlock Origin
+(Firefox) o uBlock Origin Lite (Chrome, Edge y Safari).
+
 Lo que NO puede hacer ningun programa es darte mas megas que los que te da
 tu proveedor: eso depende del plan y del router.
 
@@ -25,8 +30,12 @@ COMO SE USA
             Ejecutar de todas formas.
             Elegi 1 (estandar) o 2 (maximo).
 
-  MAC:      clic derecho en  optimizador.command  ->  Abrir  ->  Abrir
-            Te pide la contrasena de tu usuario.
+  MAC:      1. Abri la app Terminal (Cmd + Espacio, escribi Terminal, Enter).
+            2. Escribi  bash  y un espacio.
+            3. Arrastra el archivo  optimizador.command  a la ventana.
+            4. Enter. Te pide la contrasena de tu Mac (no se ve al
+               escribirla): escribila y Enter.
+            Asi macOS no lo bloquea por ser un archivo descargado.
 
   LINUX:    ./optimizador.command
 

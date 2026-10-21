@@ -5,7 +5,7 @@
 #  pone DNS rápido con filtro de malware (Cloudflare 1.1.1.2, solo Mac)
 #  y limpia la caché DNS.
 #
-#  Uso:  doble clic (Mac)  o  ./optimizador.command [optimizar|maximo|restaurar]
+#  Uso:  doble clic (Mac)  o  bash optimizador.command [optimizar|maximo|restaurar]
 # ============================================================
 cd "$(dirname "$0")" || exit 1
 CARPETA="$(pwd)"
@@ -49,7 +49,8 @@ fi
 if [ "$(id -u)" -ne 0 ] && [ -z "$HOSTS_FILE" ]; then
   echo ""
   echo "  Te va a pedir la contraseña de tu usuario (no se ve mientras la escribís)."
-  exec sudo "$0" "$ACCION"
+  # Con "bash" adelante anda aunque el archivo haya perdido el permiso de ejecución.
+  exec sudo bash "$0" "$ACCION"
 fi
 
 # Hosts sin nuestro bloque: las entradas propias del usuario se conservan.
@@ -57,8 +58,12 @@ hosts_sin_bloque() {
   awk -v ini="$MARCA_INICIO" -v fin="$MARCA_FIN" '
     $0 == ini { dentro = 1; next }
     $0 == fin { dentro = 0; next }
-    !dentro { print }
-  ' "$HOSTS" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}'
+    dentro { next }
+    # Las líneas vacías se guardan y solo se imprimen si sigue texto:
+    # así no se acumulan al final cada vez que se optimiza.
+    /^[ \t\r]*$/ { vacias = vacias $0 "\n"; next }
+    { printf "%s", vacias; vacias = ""; print }
+  ' "$HOSTS"
 }
 
 limpiar_cache_dns() {

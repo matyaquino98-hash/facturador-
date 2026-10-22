@@ -1,0 +1,80 @@
+MI VPN - propia, gratis y dificil de detectar
+=============================================
+
+Usa VLESS + Reality: para el Wi-Fi por el que pasas, tu conexion parece una
+visita comun y segura (HTTPS) a www.microsoft.com. No usa los puertos ni las
+huellas de una VPN tradicional, asi que los filtros no la reconocen.
+
+El servidor es tuyo y gratis para siempre (plan "Always Free" de Oracle).
+
+
+PASO 1 - CREAR EL SERVIDOR GRATIS (una sola vez, unos 15 minutos)
+-----------------------------------------------------------------
+ 1. Entra a  oracle.com/cloud/free  -> "Start for free".
+    Pide tarjeta solo para verificar que sos una persona: NO cobra mientras
+    uses cosas marcadas "Always Free".
+ 2. Cuando pida "Home Region" elegi  Brazil East (Sao Paulo)  o
+    Chile Central (Santiago): son las mas cercanas y no se puede cambiar
+    despues.
+ 3. Ya adentro: menu (las tres rayitas) -> Compute -> Instances ->
+    "Create instance".
+      - Image: "Change image" -> Canonical Ubuntu (24.04).
+      - Shape: deja una que diga "Always Free-eligible".
+      - Add SSH keys: "Generate a key pair for me" -> "Save private key".
+        Se descarga un archivo  ssh-key-....key  : NO lo pierdas.
+      - "Create".
+ 4. Cuando diga RUNNING, copia la "Public IP address" (ej: 152.67.10.20).
+
+
+PASO 2 - ABRIR EL PUERTO 443 EN ORACLE
+--------------------------------------
+ En la pagina de la instancia: Networking -> la "Subnet" -> Security ->
+ "Default Security List" -> "Add Ingress Rules":
+      Source CIDR:             0.0.0.0/0
+      IP Protocol:             TCP
+      Destination Port Range:  443
+ -> "Add Ingress Rules".
+ (El firewall interno del servidor lo abre el instalador solo.)
+
+
+PASO 3 - INSTALAR LA VPN (desde la Terminal de la Mac)
+------------------------------------------------------
+ 1. Abri Terminal (Cmd + Espacio, escribi Terminal, Enter).
+ 2. Escribi esto y Enter (permite usar la clave descargada):
+        chmod 600 
+    y antes de Enter arrastra el archivo ssh-key-....key a la ventana.
+ 3. Escribi  ssh -i  , arrastra otra vez el archivo de la clave, y segui
+    escribiendo (cambiando la IP por la tuya):
+        ubuntu@152.67.10.20 'sudo bash -s' < 
+    y al final arrastra el archivo  instalar-vpn.sh . Enter.
+    Queda algo asi:
+        ssh -i /Users/vos/Downloads/ssh-key-2026.key ubuntu@152.67.10.20 'sudo bash -s' < /Users/vos/Downloads/vpn/instalar-vpn.sh
+ 4. Si pregunta "Are you sure you want to continue connecting", escribi
+    yes  y Enter.
+ 5. En un minuto aparece  TU VPN ESTA LISTA , un enlace que empieza con
+    vless://  y un codigo QR.
+
+
+PASO 4 - CONECTARTE
+-------------------
+ Mac:      Baja Hiddify (gratis, de codigo abierto) desde  hiddify.com .
+           Copia el enlace vless://... entero, en Hiddify toca  +  ->
+           "Agregar desde el portapapeles", y despues el boton de conectar.
+ Celular:  Hiddify desde App Store o Google Play -> + -> escanea el QR.
+
+ Para comprobarlo: entra a  ifconfig.me  con la VPN prendida; tiene que
+ mostrar la IP de tu servidor.
+
+
+SI PERDISTE EL ENLACE
+---------------------
+ Repeti el paso 3: el instalador no cambia nada y lo vuelve a mostrar.
+
+
+SI NO CONECTA
+-------------
+ - Revisa que la regla del paso 2 este bien (TCP, puerto 443).
+ - Si www.microsoft.com estuviera bloqueado en esa red, reinstala con otro
+   sitio poniendo  SNI=www.apple.com  antes de  bash :  'sudo SNI=www.apple.com bash -s'
+   (solo funciona en una instalacion nueva; para cambiarlo en una existente,
+   borra /usr/local/etc/xray/mi-vpn.env en el servidor y repeti el paso 3).
